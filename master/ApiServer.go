@@ -33,6 +33,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/delete", handleJobDelete)
 	mux.HandleFunc("/job/list", handleJobList)
 	mux.HandleFunc("/job/kill", handleJobKill)
+	mux.HandleFunc("/job/log", handleJobLog)
 
 	//设置静态文件目录
 	staticDir := http.Dir(G_config.WebRoot)
@@ -63,6 +64,49 @@ func InitApiServer() (err error) {
 	return
 }
 
+//查询任务日志
+func handleJobLog(responseWriter http.ResponseWriter, request *http.Request) {
+	//解析提交请求参数
+	err := request.ParseForm()
+	if err != nil {
+		writeResponse(-1, "解析请求参数失败:"+err.Error(), nil, responseWriter)
+		return
+	}
+
+	//获取请求参数 /job/log?name=job1&skip=0&limit=10
+	name := request.Form.Get("name")
+	page := request.Form.Get("page")
+	size := request.Form.Get("size")
+
+	pageNum, err := strconv.Atoi(page)
+	if err != nil {
+		pageNum = 1
+		return
+	}
+	sizeNum, err := strconv.Atoi(size)
+	if err != nil {
+		sizeNum = 10
+		return
+	}
+
+	if name == "" || pageNum < 1 || sizeNum < 1 {
+		writeResponse(-1, "参数错误", nil, responseWriter)
+		return
+	}
+
+	skip := (pageNum - 1) * sizeNum
+	limit := sizeNum
+
+	jobLogArr, err := G_jobLogManager.JobLogList(name, int64(skip), int64(limit))
+	if err != nil {
+		log.Println("查询任务列表失败：", err)
+		writeResponse(-1, "查询任务列表失败:"+err.Error(), nil, responseWriter)
+		return
+	}
+
+	writeResponse(0, common.RESPONSE_SUCCESS, jobLogArr, responseWriter)
+}
+
 //强制杀死任务
 func handleJobKill(responseWriter http.ResponseWriter, request *http.Request) {
 	var (
@@ -76,18 +120,13 @@ func handleJobKill(responseWriter http.ResponseWriter, request *http.Request) {
 	killJobName = request.PostForm.Get("name")
 	err = G_jobManager.KillJob(killJobName)
 	if err == nil {
-		resp, err := common.BuildResponse(0, "success", killJobName)
-		if err != nil {
-			goto ERR
-		}
-		responseWriter.Write(resp)
+		writeResponse(0, common.RESPONSE_SUCCESS, killJobName, responseWriter)
 		return
 	}
 
 ERR:
-	log.Println("杀死任务失败: ", err.Error())
-	resp, _ := common.BuildResponse(-1, err.Error(), nil)
-	responseWriter.Write(resp)
+	log.Println("杀死任务失败：", err)
+	writeResponse(-1, "杀死任务失败："+err.Error(), nil, responseWriter)
 }
 
 //查看etcd中的任务
@@ -95,8 +134,6 @@ func handleJobList(responseWriter http.ResponseWriter, request *http.Request) {
 	var (
 		err  error
 		jobs []*common.Job
-		//Prefix string
-		resp []byte
 	)
 
 	//err = request.ParseForm()
@@ -108,15 +145,12 @@ func handleJobList(responseWriter http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		goto ERR
 	}
-	resp, err = common.BuildResponse(0, "success", jobs)
-	if err == nil {
-		responseWriter.Write(resp)
-		return
-	}
+	writeResponse(0, common.RESPONSE_SUCCESS, jobs, responseWriter)
+	return
+
 ERR:
 	log.Println("获取任务列表失败：", err.Error())
-	resp, _ = common.BuildResponse(-1, err.Error(), nil)
-	responseWriter.Write(resp)
+	writeResponse(-1, "获取任务列表失败："+err.Error(), nil, responseWriter)
 }
 
 //保存任务接口
@@ -126,7 +160,6 @@ func handleJobSave(responseWriter http.ResponseWriter, request *http.Request) {
 	var (
 		jobStr string
 		err    error
-		resp   []byte
 		job    *common.Job
 		oldJob *common.Job
 	)
@@ -156,16 +189,12 @@ func handleJobSave(responseWriter http.ResponseWriter, request *http.Request) {
 		goto ERR
 	}
 	//5.返回正常应答
-	resp, err = common.BuildResponse(0, "success", oldJob)
-	if err == nil {
-		responseWriter.Write(resp)
-		return
-	}
+	writeResponse(0, common.RESPONSE_SUCCESS, oldJob, responseWriter)
+	return
 ERR:
 	//6.返回错误应答
 	log.Println("保存任务失败：", err.Error())
-	resp, _ = common.BuildResponse(-1, err.Error(), nil)
-	responseWriter.Write(resp)
+	writeResponse(-1, "保存任务失败："+err.Error(), nil, responseWriter)
 }
 
 //删除任务接口
@@ -186,17 +215,22 @@ func handleJobDelete(responseWriter http.ResponseWriter, request *http.Request) 
 	//删除的任务名
 	jobName = request.PostForm.Get("name")
 	oldJob, err = G_jobManager.DeleteJob(jobName)
-	if err == nil {
-		resp, err := common.BuildResponse(0, "success", oldJob)
-		if err != nil {
-			goto ERR
-		}
-		responseWriter.Write(resp)
-		return
+	if err != nil {
+		goto ERR
 	}
+
+	writeResponse(0, common.RESPONSE_SUCCESS, oldJob, responseWriter)
+	return
 
 ERR:
 	log.Println("删除任务失败：", err.Error())
-	resp, _ := common.BuildResponse(0, "success", oldJob)
-	responseWriter.Write(resp)
+	writeResponse(-1, "删除任务失败："+err.Error(), nil, responseWriter)
+}
+
+func writeResponse(errNo int, message string, data interface{}, writer http.ResponseWriter) {
+	resp, _ := common.BuildResponse(errNo, message, data)
+	_, err := writer.Write(resp)
+	if err != nil {
+		log.Println(err)
+	}
 }

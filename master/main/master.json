@@ -15,5 +15,11 @@
   "etcdDialTimeout" : 5000,
 
   "web页面根目录" : "部署后，变成前端的地址",
-  "webRoot" : "./webroot"
+  "webRoot" : "./webroot",
+
+  "mongodb地址": "采用mongodb URI",
+  "mongodbUri": "mongodb://localhost:27017",
+
+  "mongodb连接超时时间": "单位毫秒",
+  "mongodbConnectTimeout": 5000
 }

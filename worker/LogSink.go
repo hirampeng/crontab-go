@@ -91,7 +91,10 @@ func (logSink *LogSink) saveLogs(batch *common.LogBatch) {
 	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	log.Println("插入任务执行日志：", batch.JobLogs)
 	log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	logSink.logCollection.InsertMany(context.TODO(), batch.JobLogs)
+	_, err := logSink.logCollection.InsertMany(context.TODO(), batch.JobLogs)
+	if err != nil {
+		log.Println("插入数据失败：", batch.JobLogs, err)
+	}
 }
 
 func InitLogSink() (err error) {

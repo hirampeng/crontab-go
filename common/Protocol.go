@@ -71,6 +71,18 @@ type LogBatch struct {
 	JobLogs []interface{}
 }
 
+// 任务日志过滤条件
+type JobLogFilter struct {
+	JobName string `bson:"jobName"`
+}
+
+// 任务日志排序规则
+type JobLogSort struct {
+	//例：降序 {startTime: -1}
+	StartTime int `bson:"startTime"`
+}
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //建立应答方法
 func BuildResponse(errNo int, msg string, data interface{}) (resp []byte, err error) {
 	response := Response{

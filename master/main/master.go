@@ -42,6 +42,13 @@ func main() {
 		goto ERR
 	}
 
+	//启动作业日志服务
+	err = master.InitJobLogManager()
+	if err != nil {
+		goto ERR
+	}
+
+	//启动作业管理服务
 	err = master.InitJobManager()
 	if err != nil {
 		goto ERR

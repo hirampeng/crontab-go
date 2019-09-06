@@ -11,12 +11,14 @@ var (
 
 //定义配置结构体
 type Config struct {
-	ApiPort         int      `json:"apiPort"`
-	ApiReadTimeOut  int      `json:"apiReadTimeout"`
-	ApiWriteTimeout int      `json:"apiWriteTimeout"`
-	EtcdEndpoints   []string `json:"etcdEndpoints"`
-	EtcdDialTimeout int      `json:"etcdDialTimeout"`
-	WebRoot         string   `json:"webRoot"`
+	ApiPort               int      `json:"apiPort"`
+	ApiReadTimeOut        int      `json:"apiReadTimeout"`
+	ApiWriteTimeout       int      `json:"apiWriteTimeout"`
+	EtcdEndpoints         []string `json:"etcdEndpoints"`
+	EtcdDialTimeout       int      `json:"etcdDialTimeout"`
+	WebRoot               string   `json:"webRoot"`
+	MongodbUri            string   `json:"mongodbUri"`
+	MongodbConnectTimeout int      `json:"mongodbConnectTimeout"`
 }
 
 //加载配置

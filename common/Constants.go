@@ -1,6 +1,8 @@
 package common
 
 const (
+	//请求成功应答
+	RESPONSE_SUCCESS = "Success!"
 	//任务保存前缀
 	JOB_SAVE_DIR = "/cron/jobList/"
 	JOB_KILL_DIR = "/cron/jobKillList"
