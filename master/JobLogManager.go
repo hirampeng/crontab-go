@@ -71,7 +71,7 @@ func (jobLogManager JobLogManager) JobLogList(name string, skip int64, limit int
 	defer cursor.Close(context.TODO())
 
 	//初始化jobLog数组
-	jobLogArr = make([]*common.JobLog, limit)
+	jobLogArr = make([]*common.JobLog, 0)
 
 	for cursor.Next(context.TODO()) {
 		jobLog := &common.JobLog{}

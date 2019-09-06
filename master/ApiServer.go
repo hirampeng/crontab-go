@@ -81,12 +81,10 @@ func handleJobLog(responseWriter http.ResponseWriter, request *http.Request) {
 	pageNum, err := strconv.Atoi(page)
 	if err != nil {
 		pageNum = 1
-		return
 	}
 	sizeNum, err := strconv.Atoi(size)
 	if err != nil {
 		sizeNum = 10
-		return
 	}
 
 	if name == "" || pageNum < 1 || sizeNum < 1 {
