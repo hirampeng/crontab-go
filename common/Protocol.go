@@ -114,8 +114,8 @@ func BuildJobEvent(eventType int, job *Job) *JobEvent {
 }
 
 //cron/jobList/job1 -> job1
-func ExtractJobName(jobName string, prefix string) string {
-	return strings.TrimPrefix(jobName, JOB_SAVE_DIR)
+func ExtractString(jobName string, prefix string) string {
+	return strings.TrimPrefix(jobName, prefix)
 }
 
 //生成任务调度计划对象

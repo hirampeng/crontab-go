@@ -34,6 +34,7 @@ func InitApiServer() (err error) {
 	mux.HandleFunc("/job/list", handleJobList)
 	mux.HandleFunc("/job/kill", handleJobKill)
 	mux.HandleFunc("/job/log", handleJobLog)
+	mux.HandleFunc("/worker/list", handleWorkerList)
 
 	//设置静态文件目录
 	staticDir := http.Dir(G_config.WebRoot)
@@ -62,6 +63,17 @@ func InitApiServer() (err error) {
 
 	log.Println("服务端开始监听端口：" + strconv.Itoa(G_config.ApiPort))
 	return
+}
+
+//获取健康节点列表
+func handleWorkerList(responseWriter http.ResponseWriter, request *http.Request) {
+	workers, err := G_workerManager.ListWorkers()
+
+	if err == nil {
+		writeResponse(0, common.RESPONSE_SUCCESS, workers, responseWriter)
+	} else {
+		writeResponse(-1, "获取健康节点列表失败:"+err.Error(), nil, responseWriter)
+	}
 }
 
 //查询任务日志

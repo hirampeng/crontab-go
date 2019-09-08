@@ -42,6 +42,11 @@ func main() {
 		goto ERR
 	}
 
+	err = worker.InitRegister()
+	if err != nil {
+		goto ERR
+	}
+
 	//启动日志协程
 	if err = worker.InitLogSink(); err != nil {
 		goto ERR

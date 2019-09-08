@@ -97,7 +97,7 @@ func (jobManager *JobManager) watchJobs() (err error) {
 					log.Println(jobEvent)
 				case mvccpb.DELETE: //任务删除事件
 					//反序列化Job, 推一个更新事件给scheduler
-					delJobName := common.ExtractJobName(string(watchEvent.Kv.Key), common.JOB_SAVE_DIR)
+					delJobName := common.ExtractString(string(watchEvent.Kv.Key), common.JOB_SAVE_DIR)
 					if len(delJobName) > 0 {
 						jobEvent = common.BuildJobEvent(common.JOB_EVENT_DELETE, &common.Job{Name: delJobName})
 					}
@@ -127,12 +127,12 @@ func (jobManager *JobManager) watchKilledJobs() (err error) {
 				switch watchEvent.Type {
 				case mvccpb.PUT: //强杀任务事件
 					//反序列化Job, 推一个强杀事件给scheduler
-					killJobName := common.ExtractJobName(string(watchEvent.Kv.Key), common.JOB_KILL_DIR)
+					killJobName := common.ExtractString(string(watchEvent.Kv.Key), common.JOB_KILL_DIR)
 					if len(killJobName) > 0 {
 						jobEvent = common.BuildJobEvent(common.JOB_EVENT_KILL, &common.Job{Name: killJobName})
 					}
 				case mvccpb.DELETE: //取消强杀  暂时不实现
-					cancelKillJobName := common.ExtractJobName(string(watchEvent.Kv.Key), common.JOB_KILL_DIR)
+					cancelKillJobName := common.ExtractString(string(watchEvent.Kv.Key), common.JOB_KILL_DIR)
 					if len(cancelKillJobName) > 0 {
 						//jobEvent = common.BuildJobEvent(common.JOB_EVENT_CANCEL_KILL, &common.Job{Name:cancelKillJobName})
 						log.Println("取消强杀任务：", cancelKillJobName)
